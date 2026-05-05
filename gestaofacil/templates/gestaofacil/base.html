@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestão Fácil{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #0dcaf0;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+            background: linear-gradient(135deg, var(--primary-color) 0%, #0a58ca 100%);
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 56px;
+            width: 250px;
+            height: calc(100vh - 56px);
+            background-color: #ffffff;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+        
+        .sidebar .nav-link {
+            color: #495057;
+            padding: 12px 20px;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: var(--primary-color);
+            background-color: #f8f9fa;
+            border-left-color: var(--primary-color);
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            margin-top: 56px;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-card {
+            padding: 20px;
+            border-left: 4px solid;
+            border-radius: 8px;
+            color: #fff;
+        }
+        
+        .stat-card.receita {
+            border-left-color: var(--success-color);
+            background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        }
+        
+        .stat-card.despesa {
+            border-left-color: var(--danger-color);
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+        
+        .stat-card.saldo {
+            border-left-color: var(--info-color);
+            background: linear-gradient(135deg, #0dcaf0 0%, #0dbde5 100%);
+        }
+        
+        .stat-card h6 {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+        
+        .badge-receita {
+            background-color: var(--success-color);
+        }
+        
+        .badge-despesa {
+            background-color: var(--danger-color);
+        }
+        
+        .badge-pago {
+            background-color: var(--success-color);
+        }
+        
+        .badge-pendente {
+            background-color: var(--warning-color);
+            color: #000;
+        }
+        
+        .table {
+            background-color: #ffffff;
+        }
+        
+        .table thead th {
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            color: #495057;
+            background-color: #f8f9fa;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #212529;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #0a58ca 100%);
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+        }
+        
+        .form-control, .form-select {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+                top: 0;
+                padding: 10px 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                margin-top: 0;
+                padding: 20px;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'transacao-list' %}">
+                <i class="bi bi-wallet2"></i> Gestão Fácil
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'transacao-list' %}">
+                            <i class="bi bi-house"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/">
+                            <i class="bi bi-gear"></i> Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <nav class="nav flex-column">
+            <a class="nav-link" href="{% url 'transacao-list' %}">
+                <i class="bi bi-list-ul"></i> Minhas Transações
+            </a>
+            <a class="nav-link" href="{% url 'transacao-create' %}">
+                <i class="bi bi-plus-circle"></i> Nova Transação
+            </a>
+        </nav>
+        <hr>
+        <div class="px-3">
+            <h6 class="text-muted small">Filtros Rápidos</h6>
+            <a href="?tipo=receita" class="text-decoration-none">
+                <span class="badge badge-receita">Receitas</span>
+            </a>
+            <a href="?tipo=despesa" class="text-decoration-none">
+                <span class="badge badge-despesa">Despesas</span>
+            </a>
+            <a href="?status=pendente" class="text-decoration-none">
+                <span class="badge badge-pendente">Pendentes</span>
+            </a>
+            <a href="{% url 'transacao-list' %}" class="text-decoration-none mt-2 d-inline-block">
+                <span class="badge bg-secondary">Limpar filtros</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

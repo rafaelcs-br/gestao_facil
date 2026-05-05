@@ -1,0 +1,136 @@
+{% extends 'gestaofacil/base.html' %}
+
+{% block title %}{{ transacao.rotulo }} - Gestão Fácil{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>
+            <i class="bi bi-file-text"></i> Detalhes da Transação
+        </h1>
+        <p class="text-muted">Visualize todas as informações desta transação</p>
+    </div>
+    <div class="btn-group" role="group">
+        <a href="{% url 'transacao-update' transacao.pk %}" class="btn btn-warning">
+            <i class="bi bi-pencil"></i> Editar
+        </a>
+        <a href="{% url 'transacao-delete' transacao.pk %}" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Deletar
+        </a>
+        <a href="{% url 'transacao-list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0">{{ transacao.rotulo }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="text-muted small mb-1">Tipo</label>
+                        <div>
+                            {% if transacao.tipo == 'receita' %}
+                                <span class="badge badge-receita" style="font-size: 1rem; padding: 8px 12px;">
+                                    <i class="bi bi-arrow-down-circle"></i> Receita
+                                </span>
+                            {% else %}
+                                <span class="badge badge-despesa" style="font-size: 1rem; padding: 8px 12px;">
+                                    <i class="bi bi-arrow-up-circle"></i> Despesa
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small mb-1">Status</label>
+                        <div>
+                            {% if transacao.status == 'pago' %}
+                                <span class="badge badge-pago" style="font-size: 1rem; padding: 8px 12px;">
+                                    <i class="bi bi-check-circle"></i> Pago
+                                </span>
+                            {% else %}
+                                <span class="badge badge-pendente" style="font-size: 1rem; padding: 8px 12px;">
+                                    <i class="bi bi-clock"></i> Pendente
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="text-muted small mb-1">Valor</label>
+                        <div class="h4 mb-0">
+                            <strong class="{% if transacao.tipo == 'receita' %}text-success{% else %}text-danger{% endif %}">
+                                {% if transacao.tipo == 'receita' %}+{% else %}-{% endif %}
+                                R$ {{ transacao.valor|floatformat:2 }}
+                            </strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small mb-1">Data</label>
+                        <div class="h5 mb-0">
+                            <i class="bi bi-calendar-event"></i> {{ transacao.data|date:'d \d\e F \d\e Y' }}
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row text-muted small">
+                    <div class="col-md-6">
+                        <label class="text-muted small mb-1">Criada em</label>
+                        <div>{{ transacao.criada_em|date:'d/m/Y \à\s H:i' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small mb-1">Atualizada em</label>
+                        <div>{{ transacao.atualizada_em|date:'d/m/Y \à\s H:i' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-lightning"></i> Ações Rápidas
+                </h5>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'transacao-update' transacao.pk %}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <a href="{% url 'transacao-delete' transacao.pk %}" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Deletar
+                    </a>
+                    <a href="{% url 'transacao-create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Nova Transação
+                    </a>
+                    <a href="{% url 'transacao-list' %}" class="btn btn-secondary">
+                        <i class="bi bi-list-ul"></i> Voltar para Lista
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumo -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-info-circle"></i> ID
+                </h5>
+                <p class="text-muted small mb-0">
+                    #{{ transacao.pk }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
