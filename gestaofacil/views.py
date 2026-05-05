@@ -1,4 +1,11 @@
 import json
+import csv
+from io import BytesIO
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
@@ -6,6 +13,7 @@ from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum, Min
 from django.utils import timezone
 from datetime import timedelta
+from django.http import HttpResponse
 from .models import Transacao, Investimento
 from django import forms
 
@@ -87,9 +95,13 @@ class TransacaoListView(ListView):
         selected_year = getattr(self, 'selected_year', today.year)
         selected_month = getattr(self, 'selected_month', today.month)
         
-        transacoes = Transacao.objects.all()
-        receitas = transacoes.filter(tipo='receita').aggregate(Sum('valor'))['valor__sum'] or 0
-        despesas = transacoes.filter(tipo='despesa').aggregate(Sum('valor'))['valor__sum'] or 0
+        # Filtrar transações pelo mês/ano selecionado
+        transacoes_filtradas = Transacao.objects.filter(
+            data__year=selected_year, 
+            data__month=selected_month
+        )
+        receitas = transacoes_filtradas.filter(tipo='receita').aggregate(Sum('valor'))['valor__sum'] or 0
+        despesas = transacoes_filtradas.filter(tipo='despesa').aggregate(Sum('valor'))['valor__sum'] or 0
         saldo = receitas - despesas
         
         percent_despesas = (despesas / receitas) * 100 if receitas else 0
@@ -107,6 +119,8 @@ class TransacaoListView(ListView):
         context['selected_year'] = selected_year
         context['selected_month'] = selected_month
         
+        # Para os year_options, usar todas as transações
+        transacoes = Transacao.objects.all()
         min_data = transacoes.aggregate(min_data=Min('data'))['min_data']
         if min_data:
             start_year = min_data.year
@@ -144,6 +158,312 @@ def toggle_status(request, pk):
     transacao.save()
     next_url = request.GET.get('next') or request.META.get('HTTP_REFERER') or reverse('transacao-list')
     return redirect(next_url)
+
+
+def export_transacoes_csv(request):
+    """Exporta transações filtradas para CSV"""
+    today = timezone.localdate()
+    ano = request.GET.get('ano')
+    mes = request.GET.get('mes')
+    tipo = request.GET.get('tipo')
+    status = request.GET.get('status')
+    busca = request.GET.get('busca')
+
+    # Definir valores padrão como na view principal
+    if not ano:
+        ano = str(today.year)
+    if not mes:
+        mes = str(today.month)
+
+    try:
+        ano_int = int(ano)
+    except (TypeError, ValueError):
+        ano_int = today.year
+    try:
+        mes_int = int(mes)
+    except (TypeError, ValueError):
+        mes_int = today.month
+
+    # Aplicar filtros
+    queryset = Transacao.objects.all()
+
+    # Filtrar por ano e mês (sempre aplicados)
+    queryset = queryset.filter(data__year=ano_int, data__month=mes_int)
+
+    if tipo:
+        queryset = queryset.filter(tipo=tipo)
+    if status:
+        queryset = queryset.filter(status=status)
+    if busca:
+        queryset = queryset.filter(rotulo__icontains=busca)
+
+    # Ordenar por data
+    queryset = queryset.order_by('data')
+
+    # Criar resposta CSV
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="transacoes.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Data', 'Descrição', 'Tipo', 'Valor', 'Status'])
+
+    for transacao in queryset:
+        writer.writerow([
+            transacao.data.strftime('%d/%m/%Y'),
+            transacao.rotulo,
+            transacao.get_tipo_display(),
+            f"R$ {transacao.valor:.2f}",
+            transacao.get_status_display()
+        ])
+
+    return response
+
+
+def export_transacoes_pdf(request):
+    """Exporta transações filtradas para PDF"""
+    today = timezone.localdate()
+    ano = request.GET.get('ano')
+    mes = request.GET.get('mes')
+    tipo = request.GET.get('tipo')
+    status = request.GET.get('status')
+    busca = request.GET.get('busca')
+
+    # Definir valores padrão como na view principal
+    if not ano:
+        ano = str(today.year)
+    if not mes:
+        mes = str(today.month)
+
+    try:
+        ano_int = int(ano)
+    except (TypeError, ValueError):
+        ano_int = today.year
+    try:
+        mes_int = int(mes)
+    except (TypeError, ValueError):
+        mes_int = today.month
+
+    # Aplicar filtros
+    queryset = Transacao.objects.all()
+
+    # Filtrar por ano e mês (sempre aplicados)
+    queryset = queryset.filter(data__year=ano_int, data__month=mes_int)
+
+    if tipo:
+        queryset = queryset.filter(tipo=tipo)
+    if status:
+        queryset = queryset.filter(status=status)
+    if busca:
+        queryset = queryset.filter(rotulo__icontains=busca)
+
+    # Ordenar por data
+    queryset = queryset.order_by('data')
+
+    # Criar buffer para PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    elements = []
+
+    # Estilos
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=30,
+    )
+
+    # Título
+    periodo = ""
+    if ano and mes:
+        periodo = f" - {mes}/{ano}"
+    elif ano:
+        periodo = f" - {ano}"
+    elif mes:
+        periodo = f" - Mês {mes}"
+
+    title = Paragraph(f"Relatório de Transações{periodo}", title_style)
+    elements.append(title)
+    elements.append(Spacer(1, 12))
+
+    # Dados da tabela
+    data = [['Data', 'Descrição', 'Tipo', 'Valor', 'Status']]
+
+    for transacao in queryset:
+        data.append([
+            transacao.data.strftime('%d/%m/%Y'),
+            transacao.rotulo,
+            transacao.get_tipo_display(),
+            f"R$ {transacao.valor:.2f}",
+            transacao.get_status_display()
+        ])
+
+    # Criar tabela
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+
+    elements.append(table)
+
+    # Gerar PDF
+    doc.build(elements)
+    buffer.seek(0)
+
+    # Criar resposta
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="transacoes.pdf"'
+
+    return response
+
+
+def export_transacoes_csv_ano(request):
+    """Exporta transações do ano inteiro selecionado para CSV"""
+    today = timezone.localdate()
+    ano = request.GET.get('ano')
+    tipo = request.GET.get('tipo')
+    status = request.GET.get('status')
+    busca = request.GET.get('busca')
+
+    # Definir valor padrão para ano
+    if not ano:
+        ano = str(today.year)
+
+    try:
+        ano_int = int(ano)
+    except (TypeError, ValueError):
+        ano_int = today.year
+
+    # Aplicar filtros
+    queryset = Transacao.objects.all()
+
+    # Filtrar apenas por ano (ano inteiro)
+    queryset = queryset.filter(data__year=ano_int)
+
+    if tipo:
+        queryset = queryset.filter(tipo=tipo)
+    if status:
+        queryset = queryset.filter(status=status)
+    if busca:
+        queryset = queryset.filter(rotulo__icontains=busca)
+
+    # Ordenar por data
+    queryset = queryset.order_by('data')
+
+    # Criar resposta CSV
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="transacoes_{ano_int}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Data', 'Descrição', 'Tipo', 'Valor', 'Status'])
+
+    for transacao in queryset:
+        writer.writerow([
+            transacao.data.strftime('%d/%m/%Y'),
+            transacao.rotulo,
+            transacao.get_tipo_display(),
+            f"R$ {transacao.valor:.2f}",
+            transacao.get_status_display()
+        ])
+
+    return response
+
+
+def export_transacoes_pdf_ano(request):
+    """Exporta transações do ano inteiro selecionado para PDF"""
+    today = timezone.localdate()
+    ano = request.GET.get('ano')
+    tipo = request.GET.get('tipo')
+    status = request.GET.get('status')
+    busca = request.GET.get('busca')
+
+    # Definir valor padrão para ano
+    if not ano:
+        ano = str(today.year)
+
+    try:
+        ano_int = int(ano)
+    except (TypeError, ValueError):
+        ano_int = today.year
+
+    # Aplicar filtros
+    queryset = Transacao.objects.all()
+
+    # Filtrar apenas por ano (ano inteiro)
+    queryset = queryset.filter(data__year=ano_int)
+
+    if tipo:
+        queryset = queryset.filter(tipo=tipo)
+    if status:
+        queryset = queryset.filter(status=status)
+    if busca:
+        queryset = queryset.filter(rotulo__icontains=busca)
+
+    # Ordenar por data
+    queryset = queryset.order_by('data')
+
+    # Criar buffer para PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    elements = []
+
+    # Estilos
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=30,
+    )
+
+    # Título
+    title = Paragraph(f"Relatório de Transações - Ano {ano_int}", title_style)
+    elements.append(title)
+    elements.append(Spacer(1, 12))
+
+    # Dados da tabela
+    data = [['Data', 'Descrição', 'Tipo', 'Valor', 'Status']]
+
+    for transacao in queryset:
+        data.append([
+            transacao.data.strftime('%d/%m/%Y'),
+            transacao.rotulo,
+            transacao.get_tipo_display(),
+            f"R$ {transacao.valor:.2f}",
+            transacao.get_status_display()
+        ])
+
+    # Criar tabela
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+
+    elements.append(table)
+
+    # Gerar PDF
+    doc.build(elements)
+    buffer.seek(0)
+
+    # Criar resposta
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="transacoes_{ano_int}.pdf"'
+
+    return response
 
 
 class TransacaoCreateView(CreateView):

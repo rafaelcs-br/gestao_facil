@@ -21,13 +21,15 @@
         }
         
         .navbar {
-            box-shadow: 0 2px 4px rgba(0,0,0,.1);
-            background: linear-gradient(135deg, var(--primary-color) 0%, #0a58ca 100%);
+            box-shadow: 0 1px 3px rgba(0,0,0,.1);
+            background-color: #ffffff;
+            border-bottom: 1px solid #e9ecef;
         }
         
         .navbar-brand {
             font-weight: 600;
-            font-size: 1.3rem;
+            font-size: 1.25rem;
+            color: #212529;
         }
         
         .sidebar {
@@ -37,96 +39,90 @@
             width: 250px;
             height: calc(100vh - 56px);
             background-color: #ffffff;
-            border-right: 1px solid #dee2e6;
+            border-right: 1px solid #e9ecef;
             overflow-y: auto;
             padding: 20px 0;
         }
         
         .sidebar .nav-link {
-            color: #495057;
-            padding: 12px 20px;
+            color: #6c757d;
+            padding: 10px 20px;
             border-left: 3px solid transparent;
-            transition: all 0.3s ease;
         }
         
         .sidebar .nav-link:hover,
         .sidebar .nav-link.active {
-            color: var(--primary-color);
+            color: #0d6efd;
             background-color: #f8f9fa;
-            border-left-color: var(--primary-color);
+            border-left-color: #0d6efd;
         }
         
         .main-content {
             margin-left: 250px;
-            padding: 30px;
+            padding: 24px;
             margin-top: 56px;
         }
         
         .card {
-            border: none;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            border-radius: 10px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border: 1px solid #e9ecef;
+            box-shadow: none;
+            border-radius: 6px;
+            background-color: #ffffff;
         }
         
         .stat-card {
-            padding: 20px;
-            border-left: 4px solid;
-            border-radius: 8px;
-            color: #fff;
+            padding: 16px;
+            border-left: 3px solid;
+            border-radius: 4px;
+            color: #ffffff;
         }
         
         .stat-card.receita {
-            border-left-color: var(--success-color);
-            background: linear-gradient(135deg, #198754 0%, #157347 100%);
+            border-left-color: #198754;
+            background-color: #198754;
         }
         
         .stat-card.despesa {
-            border-left-color: var(--danger-color);
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            border-left-color: #dc3545;
+            background-color: #dc3545;
         }
         
         .stat-card.saldo {
-            border-left-color: var(--info-color);
-            background: linear-gradient(135deg, #0dcaf0 0%, #0dbde5 100%);
+            border-left-color: #0dcaf0;
+            background-color: #0dcaf0;
         }
         
         .stat-card h6 {
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             opacity: 0.9;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
         
         .stat-card .value {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 600;
         }
         
         .btn-sm {
-            padding: 5px 10px;
-            font-size: 0.85rem;
+            padding: 4px 8px;
+            font-size: 0.8125rem;
         }
         
         .badge-receita {
-            background-color: var(--success-color);
+            background-color: #198754;
         }
         
         .badge-despesa {
-            background-color: var(--danger-color);
+            background-color: #dc3545;
         }
         
         .badge-pago {
-            background-color: var(--success-color);
+            background-color: #198754;
         }
         
         .badge-pendente {
-            background-color: var(--warning-color);
-            color: #000;
+            background-color: #ffc107;
+            color: #212529;
         }
         
         .table {
@@ -134,7 +130,7 @@
         }
         
         .table thead th {
-            border-bottom: 2px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
             font-weight: 600;
             color: #495057;
             background-color: #f8f9fa;
@@ -148,41 +144,40 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
         }
         
         .page-header h1 {
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 600;
             color: #212529;
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #0a58ca 100%);
-            border: none;
-            transition: all 0.3s ease;
+            background-color: #0d6efd;
+            border: 1px solid #0d6efd;
+            color: #ffffff;
         }
         
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
         }
         
         .form-control, .form-select {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 10px 15px;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 8px 12px;
         }
         
         .form-control:focus, .form-select:focus {
-            border-color: var(--primary-color);
+            border-color: #0d6efd;
             box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
         }
         
         .alert {
-            border-radius: 8px;
-            border: none;
+            border-radius: 4px;
+            border: 1px solid;
         }
         
         @media (max-width: 768px) {
@@ -191,7 +186,7 @@
                 width: 100%;
                 height: auto;
                 border-right: none;
-                border-bottom: 1px solid #dee2e6;
+                border-bottom: 1px solid #e9ecef;
                 top: 0;
                 padding: 10px 0;
             }
@@ -199,13 +194,13 @@
             .main-content {
                 margin-left: 0;
                 margin-top: 0;
-                padding: 20px;
+                padding: 16px;
             }
             
             .page-header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 15px;
+                gap: 12px;
             }
         }
     </style>
@@ -213,7 +208,7 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="{% url 'transacao-list' %}">
                 <i class="bi bi-wallet2"></i> Gestão Fácil

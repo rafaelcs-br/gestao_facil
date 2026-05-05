@@ -11,6 +11,10 @@ from .views import (
     InvestimentoUpdateView,
     InvestimentoDeleteView,
     toggle_status,
+    export_transacoes_csv,
+    export_transacoes_pdf,
+    export_transacoes_csv_ano,
+    export_transacoes_pdf_ano,
 )
 
 urlpatterns = [
@@ -20,6 +24,10 @@ urlpatterns = [
     path('<int:pk>/', TransacaoDetailView.as_view(), name='transacao-detail'),
     path('<int:pk>/editar/', TransacaoUpdateView.as_view(), name='transacao-update'),
     path('<int:pk>/deletar/', TransacaoDeleteView.as_view(), name='transacao-delete'),
+    path('export/csv/', export_transacoes_csv, name='transacao-export-csv'),
+    path('export/pdf/', export_transacoes_pdf, name='transacao-export-pdf'),
+    path('export/csv/ano/', export_transacoes_csv_ano, name='transacao-export-csv-ano'),
+    path('export/pdf/ano/', export_transacoes_pdf_ano, name='transacao-export-pdf-ano'),
     path('investimentos/', InvestimentoListView.as_view(), name='investimento-list'),
     path('investimentos/criar/', InvestimentoCreateView.as_view(), name='investimento-create'),
     path('investimentos/<int:pk>/', InvestimentoDetailView.as_view(), name='investimento-detail'),

@@ -122,6 +122,26 @@
                 <a href="{% url 'transacao-list' %}" class="btn btn-secondary w-100">
                     <i class="bi bi-arrow-counterclockwise"></i> Limpar
                 </a>
+                <div class="dropdown">
+                    <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-download"></i> Exportar
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'transacao-export-csv' %}?{{ request.GET.urlencode }}">
+                            <i class="bi bi-filetype-csv"></i> Exportar CSV (Mês)
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'transacao-export-pdf' %}?{{ request.GET.urlencode }}">
+                            <i class="bi bi-file-earmark-pdf"></i> Exportar PDF (Mês)
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'transacao-export-csv-ano' %}?{{ request.GET.urlencode }}">
+                            <i class="bi bi-filetype-csv"></i> Exportar CSV (Ano Inteiro)
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'transacao-export-pdf-ano' %}?{{ request.GET.urlencode }}">
+                            <i class="bi bi-file-earmark-pdf"></i> Exportar PDF (Ano Inteiro)
+                        </a></li>
+                    </ul>
+                </div>
             </div>
         </form>
     </div>
