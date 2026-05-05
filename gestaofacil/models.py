@@ -1,6 +1,41 @@
 from django.db import models
 from django.utils.functional import cached_property
 
+class Tag(models.Model):
+    nome = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name='Nome da Tag',
+        help_text='Nome da categoria/tag para despesas'
+    )
+    cor = models.CharField(
+        max_length=7,
+        default='#6c757d',
+        verbose_name='Cor',
+        help_text='Cor hexadecimal para identificação visual'
+    )
+    descricao = models.TextField(
+        blank=True,
+        verbose_name='Descrição',
+        help_text='Descrição opcional da categoria'
+    )
+    ativa = models.BooleanField(
+        default=True,
+        verbose_name='Ativa',
+        help_text='Se a tag está ativa para uso'
+    )
+    criada_em = models.DateTimeField(auto_now_add=True)
+    atualizada_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Tag'
+        verbose_name_plural = 'Tags'
+        ordering = ['nome']
+
+    def __str__(self):
+        return self.nome
+
+
 class Transacao(models.Model):
     TIPO_CHOICES = [
         ('receita', 'Receita'),
@@ -36,6 +71,14 @@ class Transacao(models.Model):
         choices=STATUS_CHOICES,
         default='pendente',
         verbose_name='Status'
+    )
+    tag = models.ForeignKey(
+        Tag,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Tag/Categoria',
+        help_text='Categoria da despesa (apenas para despesas)'
     )
     criada_em = models.DateTimeField(auto_now_add=True)
     atualizada_em = models.DateTimeField(auto_now=True)

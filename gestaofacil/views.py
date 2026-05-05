@@ -14,13 +14,13 @@ from django.db.models import Q, Sum, Min
 from django.utils import timezone
 from datetime import timedelta
 from django.http import HttpResponse
-from .models import Transacao, Investimento
+from .models import Transacao, Investimento, Tag
 from django import forms
 
 class TransacaoForm(forms.ModelForm):
     class Meta:
         model = Transacao
-        fields = ['rotulo', 'valor', 'data', 'tipo', 'status']
+        fields = ['rotulo', 'valor', 'data', 'tipo', 'status', 'tag']
         widgets = {
             'rotulo': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -41,7 +41,17 @@ class TransacaoForm(forms.ModelForm):
             'status': forms.Select(attrs={
                 'class': 'form-select'
             }),
+            'tag': forms.Select(attrs={
+                'class': 'form-select'
+            }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtrar apenas tags ativas
+        self.fields['tag'].queryset = Tag.objects.filter(ativa=True)
+        # Tornar tag opcional por padrão
+        self.fields['tag'].required = False
 
 
 class TransacaoListView(ListView):
@@ -148,6 +158,16 @@ class TransacaoListView(ListView):
         query_params = self.request.GET.copy()
         query_params.pop('page', None)
         context['querystring'] = query_params.urlencode()
+        
+        # Estatísticas por tag/categoria (apenas despesas do mês/ano selecionado)
+        despesas_por_tag = transacoes_filtradas.filter(tipo='despesa').values('tag__nome', 'tag__cor').annotate(
+            total=Sum('valor')
+        ).filter(total__gt=0).order_by('-total')
+        
+        context['despesas_por_tag'] = list(despesas_por_tag)
+        context['tags_labels'] = json.dumps([item['tag__nome'] or 'Sem Categoria' for item in despesas_por_tag])
+        context['tags_valores'] = json.dumps([float(item['total']) for item in despesas_por_tag])
+        context['tags_cores'] = json.dumps([item['tag__cor'] or '#6c757d' for item in despesas_por_tag])
         
         return context
 

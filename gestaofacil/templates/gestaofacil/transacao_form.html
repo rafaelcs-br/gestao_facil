@@ -96,6 +96,20 @@
                         </div>
                     </div>
 
+                    <!-- Tag/Categoria (apenas para despesas) -->
+                    <div class="mb-3" id="tag-container" style="display: none;">
+                        <label for="{{ form.tag.id_for_label }}" class="form-label">
+                            <i class="bi bi-tags"></i> Categoria da Despesa
+                        </label>
+                        {{ form.tag }}
+                        {% if form.tag.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.tag.errors }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Categorize suas despesas para melhor controle financeiro</div>
+                    </div>
+
                     <!-- Botões -->
                     <div class="mt-4 d-flex gap-2">
                         <button type="submit" class="btn btn-primary btn-lg">
@@ -177,4 +191,37 @@
     }());
 </script>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Função para mostrar/ocultar campo de tag baseado no tipo
+    function updateTagVisibility() {
+        const tipoSelect = document.getElementById('{{ form.tipo.id_for_label }}');
+        const tagContainer = document.getElementById('tag-container');
+        const tagSelect = document.getElementById('{{ form.tag.id_for_label }}');
+
+        if (tipoSelect && tagContainer && tagSelect) {
+            if (tipoSelect.value === 'despesa') {
+                tagContainer.style.display = 'block';
+                tagSelect.required = true;
+            } else {
+                tagContainer.style.display = 'none';
+                tagSelect.required = false;
+                tagSelect.value = ''; // Limpar seleção quando não for despesa
+            }
+        }
+    }
+
+    // Executar quando a página carregar
+    document.addEventListener('DOMContentLoaded', function() {
+        updateTagVisibility();
+
+        // Adicionar listener para mudanças no tipo
+        const tipoSelect = document.getElementById('{{ form.tipo.id_for_label }}');
+        if (tipoSelect) {
+            tipoSelect.addEventListener('change', updateTagVisibility);
+        }
+    });
+</script>
 {% endblock %}

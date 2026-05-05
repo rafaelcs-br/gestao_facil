@@ -69,6 +69,26 @@
     </div>
 </div>
 
+<!-- Gráfico de Pizza - Despesas por Categoria -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="card-title mb-1">Despesas por Categoria</h5>
+                        <p class="text-muted mb-0">Distribuição das despesas por categoria em {{ selected_month|date:"M/Y" }}</p>
+                    </div>
+                    <span class="badge bg-info">{{ selected_month|date:"M" }}/{{ selected_year }}</span>
+                </div>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="categoriaChart" style="height: 100%; width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Filtros -->
 <div class="card mb-4">
     <div class="card-body">
@@ -338,6 +358,61 @@
                 }
             }
         });
+    }
+
+    // Gráfico de Pizza - Despesas por Categoria
+    const categoriaCanvas = document.getElementById('categoriaChart');
+    const categoriaCtx = categoriaCanvas ? categoriaCanvas.getContext('2d') : null;
+    const tagsLabels = {{ tags_labels|safe }};
+    const tagsValores = {{ tags_valores|safe }};
+    const tagsCores = {{ tags_cores|safe }};
+
+    if (categoriaCtx && tagsLabels.length > 0) {
+        new Chart(categoriaCtx, {
+            type: 'doughnut',
+            data: {
+                labels: tagsLabels,
+                datasets: [{
+                    data: tagsValores,
+                    backgroundColor: tagsCores,
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverBorderWidth: 3,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return context.label + ': R$ ' + context.parsed.toFixed(2) + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    } else if (categoriaCtx) {
+        // Mostrar mensagem quando não há dados
+        categoriaCtx.font = '16px Arial';
+        categoriaCtx.textAlign = 'center';
+        categoriaCtx.fillStyle = '#6c757d';
+        categoriaCtx.fillText('Nenhuma despesa categorizada neste período', categoriaCanvas.width / 2, categoriaCanvas.height / 2);
     }
 </script>
 {% endblock %}
