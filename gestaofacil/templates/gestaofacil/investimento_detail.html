@@ -1,0 +1,114 @@
+{% extends 'gestaofacil/base.html' %}
+
+{% block title %}{{ investimento.descricao }} - Gestão Fácil{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>
+            <i class="bi bi-file-earmark-text"></i> Detalhes do Investimento
+        </h1>
+        <p class="text-muted">Veja os dados completos deste investimento.</p>
+    </div>
+    <div class="btn-group" role="group">
+        <a href="{% url 'investimento-update' investimento.pk %}" class="btn btn-warning">
+            <i class="bi bi-pencil"></i> Editar
+        </a>
+        <a href="{% url 'investimento-delete' investimento.pk %}" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Deletar
+        </a>
+        <a href="{% url 'investimento-list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0">{{ investimento.descricao }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="text-muted small mb-1">Tipo</label>
+                        <div>
+                            {% if investimento.tipo == 'renda_fixa' %}
+                                <span class="badge badge-receita" style="font-size: 1rem; padding: 8px 12px;">
+                                    <i class="bi bi-shield-lock"></i> Renda Fixa
+                                </span>
+                            {% else %}
+                                <span class="badge badge-despesa" style="font-size: 1rem; padding: 8px 12px;">
+                                    <i class="bi bi-graph-up"></i> Renda Variável
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small mb-1">Valor</label>
+                        <div class="h4 mb-0">
+                            <strong>R$ {{ investimento.valor|floatformat:2 }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="text-muted small mb-1">Data de Aplicação</label>
+                        <div>{{ investimento.data_aplicacao|date:'d/m/Y' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small mb-1">Cotas</label>
+                        <div>{{ investimento.cotas|default:'—' }}</div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="text-muted small mb-1">Diferença para anterior</label>
+                        <div>
+                            {% if investimento.previous_investimento %}
+                                {% if investimento.diferencial >= 0 %}
+                                    <strong class="text-success">+R$ {{ investimento.diferencial|floatformat:2 }}</strong>
+                                {% else %}
+                                    <strong class="text-danger">R$ {{ investimento.diferencial|floatformat:2 }}</strong>
+                                {% endif %}
+                                <div class="text-muted small">
+                                    Comparado a {{ investimento.previous_investimento.data_aplicacao|date:'d/m/Y' }}
+                                </div>
+                            {% else %}
+                                <span class="text-muted">Sem investimento anterior com mesma descrição.</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row text-muted small">
+                    <div class="col-md-6">
+                        <label class="text-muted small mb-1">Criado em</label>
+                        <div>{{ investimento.criada_em|date:'d/m/Y \à\s H:i' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small mb-1">Atualizado em</label>
+                        <div>{{ investimento.atualizada_em|date:'d/m/Y \à\s H:i' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-info-circle"></i> Resumo
+                </h5>
+                <p class="text-muted small mb-0">Acompanhe seus investimentos e mantenha os lançamentos atualizados.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

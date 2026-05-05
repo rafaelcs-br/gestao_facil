@@ -1,0 +1,32 @@
+{% extends 'gestaofacil/base.html' %}
+
+{% block title %}Excluir Investimento - Gestão Fácil{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-trash"></i> Excluir Investimento</h1>
+        <p class="text-muted">Tem certeza de que deseja remover este investimento?</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">{{ object.descricao }}</h5>
+        <p class="text-muted">Valor: R$ {{ object.valor|floatformat:2 }}</p>
+        <p class="text-muted">Data de aplicação: {{ object.data_aplicacao|date:'d/m/Y' }}</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Excluir
+                </button>
+                <a href="{% url 'investimento-list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
