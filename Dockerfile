@@ -38,7 +38,8 @@ COPY --from=builder /app/staticfiles /app/staticfiles
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    DJANGO_SETTINGS_MODULE=setup.settings
+    DJANGO_SETTINGS_MODULE=setup.settings \
+    DEBUG=False
 
 COPY . .
 
