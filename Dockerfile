@@ -1,20 +1,17 @@
 # Use a slim Python base image compatible com Python 3.14
 FROM python:3.14-slim
 
-# Instale o uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
 # Defina o diretório de trabalho da aplicação
 WORKDIR /app
 
 # Copie apenas arquivos de dependências primeiro para acelerar o cache de build
-COPY pyproject.toml pyproject.toml
-COPY uv.lock uv.lock
-COPY README.md README.md
+COPY pyproject.toml uv.lock README.md ./
 
-# Instale dependências de sistema necessárias
+# Instale dependências de sistema necessárias e uv via pip
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gcc libpq-dev \
+    && python -m pip install --upgrade pip setuptools wheel uv \
+    && uv --version \
     && rm -rf /var/lib/apt/lists/*
 
 # Crie o ambiente virtual e sincronize dependências
