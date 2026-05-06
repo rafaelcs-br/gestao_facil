@@ -20,6 +20,10 @@ RUN apt-get update \
 # Copie todo o código da aplicação
 COPY . .
 
+# Execute migrações e colete arquivos estáticos
+RUN python manage.py collectstatic --noinput
+RUN python manage.py migrate
+
 # Defina variáveis de ambiente padrão
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=setup.settings
