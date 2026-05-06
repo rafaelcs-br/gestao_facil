@@ -31,6 +31,9 @@ RUN uv run python manage.py migrate
 # Defina variáveis de ambiente padrão
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=setup.settings
+ENV DEBUG=False
+ENV SECRET_KEY=django-insecure-production-key-change-me
+ENV ALLOWED_HOSTS=*
 
 # Exponha a porta usada pelo Gunicorn
 EXPOSE 80
